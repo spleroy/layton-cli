@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# CTF artifacts — don't accidentally commit challenge files
+*.png
+*.jpg
+*.jpeg
+*.pcap
+*.pcapng
+*.zip
+*.bin
+challenges/
