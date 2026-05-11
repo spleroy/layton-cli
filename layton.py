@@ -21,7 +21,11 @@ def run_exiftool(path):
 
 def run_strings(path):
     result = subprocess.run(["strings", "-n", "8", path], capture_output=True, text=True)
-    return result.stdout.strip()
+    lines = list(dict.fromkeys(result.stdout.strip().splitlines()))
+    return lines
+
+def strings_summary(lines):
+    return f"  {len(lines)} strings found. Use --strings to see full output."
 
 def run_binwalk(path):
     result = subprocess.run(["binwalk", path], capture_output=True, text=True)
@@ -37,6 +41,8 @@ def find_possible(text):
 def main():
     parser = argparse.ArgumentParser(description="Analyze a file with several tools")
     parser.add_argument("file", help="file to analyze")
+    parser.add_argument("--strings", action="store_true", 
+                    help="Show full strings output")
     args = parser.parse_args()
 
     if not Path(args.file).is_file():
@@ -48,8 +54,10 @@ def main():
     strings_output = run_strings(args.file)
     binwalk_output = run_binwalk(args.file)
 
+    strings_text = "\n".join(strings_output)
+
    #look for interesting patterns in the output of strings and exiftool
-    combined = strings_output + "\n" + exif_output
+    combined = strings_text + "\n" + exif_output
     highlights = find_possible(combined)
 
     # print highlights first if any were found
@@ -57,15 +65,17 @@ def main():
         print("=== HIGHLIGHTS ===")
         for finding in highlights:
             print(finding)
-        print()  
+        print()
 
-    # output results of each tool used
     print("=== File Type ===")
     print(file_output)
     print("\n=== EXIF Data ===")
     print(exif_output)
     print("\n=== Strings ===")
-    print(strings_output)
+    if args.strings:
+        print(strings_text)
+    else:
+        print(strings_summary(strings_output))
     print("\n=== Binwalk Analysis ===")
     print(binwalk_output)
 
